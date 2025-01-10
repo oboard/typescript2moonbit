@@ -37,17 +37,24 @@ export function MoonBitTransformer(props: MoonBitProps): string {
     const children = getChildren(node);
     if (children.length < 2) return "";
     const hasExport = children.length > 1 ? children[0].kind == ts.SyntaxKind.ExportKeyword : false
-    const alias = children[children.length - 1].getText()
+    let alias = children[children.length - 1].getText()
+    // alias首字母大写
+    alias = alias.charAt(0).toUpperCase() + alias.slice(1)
     const type = children[children.length - 2].getText()
-    return `${hasExport ? 'pub ' : ''}typealias TYPE_${alias} = ${type}\n`;
+    return `${hasExport ? 'pub ' : ''}typealias ${alias} = ${type}\n`;
   }
 
   function interfaceTransformer(node: Node) {
-    const children = getChildren(node);
-    const _node = node.members;
-    console.log(_node)
-    if (children.length < 2) return "";
-    const hasExport = children.length > 1 ? children[0].kind == ts.SyntaxKind.ExportKeyword : false
-    return `${hasExport ? 'pub ' : ''}fn Interface_${0}\n`;
+    const _node = node as ts.InterfaceDeclaration;
+    const hasExport = _node.modifiers?.some((m) => m.kind == ts.SyntaxKind.ExportKeyword) || false;
+    return `${hasExport ? 'pub ' : ''}struct ${_node.name.getText()} {
+  ${_node.members
+        .map((m) => m as ts.PropertySignature)
+        .map((m) => m.name.getText() + ': ' + m.type?.getText() ?? '')
+        .join('\n  ')
+      }
+}
+`;
+
   }
 }
