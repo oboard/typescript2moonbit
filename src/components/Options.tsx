@@ -41,9 +41,9 @@ export function Options(props: OptionsProps) {
         {getShowInternals()}
         {getTheme()}
         <div className="bottomLinks">
-          <ExternalLink text="About" url="https://github.com/dsherret/ts-ast-viewer/tree/main/docs/about.md" />
+          {/* <ExternalLink text="About" url="https://github.com/oboard/typescript2moonbit/tree/main/docs/about.md" /> */}
           <span>&nbsp;|&nbsp;</span>
-          <ExternalLink text="View on GitHub" url="https://github.com/dsherret/ts-ast-viewer" />
+          <ExternalLink text="View on GitHub" url="https://github.com/oboard/typescript2moonbit" />
         </div>
       </div>
     </div>

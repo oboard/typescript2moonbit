@@ -2,15 +2,10 @@
 
 ## Developing
 
-Install [Deno](https://deno.com).
-
 ```
 # install packages
-deno install
+bun install
 
 # run locally
-deno task dev
-
-# run unit tests
-deno task test
+bun dev
 ```
