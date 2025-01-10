@@ -1,5 +1,5 @@
 import { expect } from "@std/expect";
-import { Theme } from "../types/index.js";
+import { Theme } from "../types/index.ts";
 import type { CompilerApi } from "./CompilerApi.js";
 import { convertOptions } from "./convertOptions.js";
 

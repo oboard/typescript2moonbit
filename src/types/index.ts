@@ -7,11 +7,12 @@ import type {
   ScriptTarget,
   SourceFile,
   TypeChecker,
-} from "../compiler/index.js";
+} from "../compiler/index.ts";
 
 export interface StoreState {
   code: string;
   moonbitCode: string;
+  moonbitOutput: string;
   options: OptionsState;
   apiLoadingState: ApiLoadingState;
   compiler: CompilerState | undefined;

@@ -18,6 +18,8 @@ const moon = moonbitMode.init({
   },
 });
 
+const trace = moonbitMode.traceCommandFactory();
+
 export const MoonBitCodeEditor: React.FC<MoonBitCodeEditorProps> = ({
   theme = 'light'
 }) => {
@@ -116,7 +118,10 @@ export const MoonBitCodeEditor: React.FC<MoonBitCodeEditorProps> = ({
               },
             }),
           );
-          output.textContent = buffer;
+          dispatch({
+            type: 'SET_MOONBIT_OUTPUT',
+            payload: buffer
+          });
           return;
         }
         case "error": {
@@ -127,7 +132,10 @@ export const MoonBitCodeEditor: React.FC<MoonBitCodeEditorProps> = ({
     }
     const stdout = await trace(monaco.Uri.file("/main.mbt").toString());
     if (stdout === undefined) return;
-    output.textContent = stdout;
+    dispatch({
+      type: 'SET_MOONBIT_OUTPUT',
+      payload: stdout
+    });
   }
 
   monaco.editor.registerCommand("moonbit-lsp/debug-main", () => {

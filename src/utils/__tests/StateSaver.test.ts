@@ -1,5 +1,5 @@
 import { expect } from "@std/expect";
-import { Theme, TreeMode } from "../../types/index.js";
+import { Theme, TreeMode } from "../../types/index.ts";
 import * as enumUtils from "../enumUtils.js";
 import { StateSaver } from "../StateSaver.js";
 

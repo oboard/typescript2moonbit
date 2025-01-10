@@ -1,4 +1,4 @@
-import { Theme, TreeMode } from "../types/index.js";
+import { Theme, TreeMode } from "../types/index.ts";
 
 export interface VersionedState {
   version: 1 | 2 | 3 | 4;

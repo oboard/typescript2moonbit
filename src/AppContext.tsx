@@ -9,7 +9,7 @@ import {
 } from "./compiler/index.js";
 import type { CodeEditorTheme } from "./components/index.js";
 import { appReducer, deriveEditorTheme } from "./reducers/index.js";
-import { ApiLoadingState, type StoreState } from "./types/index.js";
+import { ApiLoadingState, type StoreState } from "./types/index.ts";
 import { sleep, StateSaver, UrlSaver } from "./utils/index.js";
 
 const initialScriptTarget: ScriptTarget = 99 /* Latest */;
@@ -31,6 +31,8 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   const [state, dispatch] = useReducer(appReducer, {
     apiLoadingState: ApiLoadingState.Loading,
     code: new UrlSaver().getUrlCode(),
+    moonbitCode: '',
+    moonbitOutput: '',
     options: {
       compilerPackageName: compilerVersionCollection[0].packageName,
       treeMode: stateSaver.get().treeMode,

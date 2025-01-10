@@ -1,4 +1,4 @@
-import type { TreeMode } from "../types/index.js";
+import type { TreeMode } from "../types/index.ts";
 import type { CompilerApi, Node, SourceFile } from "./CompilerApi.js";
 import { getChildrenFunction } from "./getChildrenFunction.js";
 import { getStartSafe } from "./getStartSafe.js";

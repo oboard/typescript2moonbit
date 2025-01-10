@@ -1,4 +1,4 @@
-import type { OptionsState } from "../types/index.js";
+import type { OptionsState } from "../types/index.ts";
 import type { CompilerApi, ScriptKind, ScriptTarget } from "./CompilerApi.js";
 
 export function convertOptions(apiFrom: CompilerApi | undefined, apiTo: CompilerApi, options: OptionsState) {

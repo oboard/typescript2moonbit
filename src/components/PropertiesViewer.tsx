@@ -14,7 +14,7 @@ import {
   type Type,
   type TypeChecker,
 } from "../compiler/index.js";
-import type { BindingTools, CompilerState } from "../types/index.js";
+import type { BindingTools, CompilerState } from "../types/index.ts";
 import { enumUtils, getSyntaxKindName } from "../utils/index.js";
 import { ErrorBoundary } from "./ErrorBoundary.js";
 import { FlowNodeGraph } from "./FlowNodeGraph.js";

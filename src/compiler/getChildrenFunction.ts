@@ -1,4 +1,4 @@
-import { TreeMode } from "../types/index.js";
+import { TreeMode } from "../types/index.ts";
 import { assertNever } from "../utils/index.js";
 import type { Node, SourceFile } from "./CompilerApi.js";
 

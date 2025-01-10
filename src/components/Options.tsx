@@ -8,8 +8,8 @@ import {
   type ScriptTarget,
 } from "../compiler/index.js";
 import { useOnClickOutside } from "../hooks/index.js";
-import type { OptionsState } from "../types/index.js";
-import { type Theme, TreeMode } from "../types/index.js";
+import type { OptionsState } from "../types/index.ts";
+import { type Theme, TreeMode } from "../types/index.ts";
 import { enumUtils } from "../utils/index.js";
 import { ExternalLink } from "./ExternalLink.js";
 
