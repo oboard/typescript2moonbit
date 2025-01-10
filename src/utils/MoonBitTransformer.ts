@@ -9,32 +9,45 @@ export interface MoonBitProps {
 
 export function MoonBitTransformer(props: MoonBitProps): string {
   const { sourceFile, mode } = props;
-  return renderNode(sourceFile, getChildrenFunction(mode, sourceFile));
+  const getChildren = getChildrenFunction(mode, sourceFile);
+  return renderNode(sourceFile);
 
-  function renderNode(node: Node, getChildren: (node: Node) => readonly Node[]): JSX.Element {
+  function renderNode(node: Node): string {
     const children = getChildren(node);
-    const codeTransformer = getCodeTransformer(node)(getChildren(node));
+    const codeTransformer = getCodeTransformer(node.kind)(node);
     if (children.length === 0) {
       return codeTransformer;
     } else {
-      return codeTransformer + children.map((n) => renderNode(n, getChildren)).join('');
+      return codeTransformer + children.map((n) => renderNode(n)).join('');
     }
   }
 
-  function getCodeTransformer(node: Node) {
-    switch (node.kind) {
+  function getCodeTransformer(kind: ts.SyntaxKind) {
+    switch (kind) {
       case ts.SyntaxKind.TypeAliasDeclaration:
         return typealiasTransformer;
+      case ts.SyntaxKind.InterfaceDeclaration:
+        return interfaceTransformer;
       default:
         return () => "";
     }
   }
 
-  function typealiasTransformer(children: readonly Node[]) {
-    const [_keyword, identifier, type] = children;
-    if (type == undefined) return "";
-    console.log(type, identifier);
-    if (type.getSourceFile() == undefined) return "";
-    return `typealias TYPE_${type.getText()} = ${identifier.getText()}\n`;
+  function typealiasTransformer(node: Node) {
+    const children = getChildren(node);
+    if (children.length < 2) return "";
+    const hasExport = children.length > 1 ? children[0].kind == ts.SyntaxKind.ExportKeyword : false
+    const alias = children[children.length - 1].getText()
+    const type = children[children.length - 2].getText()
+    return `${hasExport ? 'pub ' : ''}typealias TYPE_${alias} = ${type}\n`;
+  }
+
+  function interfaceTransformer(node: Node) {
+    const children = getChildren(node);
+    const _node = node.members;
+    console.log(_node)
+    if (children.length < 2) return "";
+    const hasExport = children.length > 1 ? children[0].kind == ts.SyntaxKind.ExportKeyword : false
+    return `${hasExport ? 'pub ' : ''}fn Interface_${0}\n`;
   }
 }

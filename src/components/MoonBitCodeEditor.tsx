@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useContext } from 'react';
+import { useEffect, useRef, useContext } from 'react';
 import * as monaco from 'monaco-editor-core';
 import * as moonbitMode from "@moonbit/moonpad-monaco";
 import { AppContext } from '../AppContext';
@@ -20,6 +20,36 @@ const moon = moonbitMode.init({
 
 const trace = moonbitMode.traceCommandFactory();
 
+// 移除手动定义的语法规则，使用 TextMate 语法
+// monaco.languages.register({ id: 'moonbit' });
+
+// 设置编辑器主题
+monaco.editor.defineTheme('moonbit-light', {
+  base: 'vs',
+  inherit: true,
+  rules: [
+    { token: 'keyword', foreground: '0000FF', fontStyle: 'bold' },
+    { token: 'type', foreground: '008080' },
+    { token: 'string', foreground: 'A31515' },
+    { token: 'number', foreground: '098658' },
+    { token: 'comment', foreground: '008000' },
+  ],
+  colors: {}
+});
+
+monaco.editor.defineTheme('moonbit-dark', {
+  base: 'vs-dark',
+  inherit: true,
+  rules: [
+    { token: 'keyword', foreground: '569CD6', fontStyle: 'bold' },
+    { token: 'type', foreground: '4EC9B0' },
+    { token: 'string', foreground: 'CE9178' },
+    { token: 'number', foreground: 'B5CEA8' },
+    { token: 'comment', foreground: '6A9955' },
+  ],
+  colors: {}
+});
+
 export const MoonBitCodeEditor: React.FC<MoonBitCodeEditorProps> = ({
   theme = 'light'
 }) => {
@@ -34,6 +64,11 @@ export const MoonBitCodeEditor: React.FC<MoonBitCodeEditorProps> = ({
     mode: state.options.treeMode,
   });
 
+  useEffect(() => {
+    monaco.editor.registerCommand("moonbit-lsp/debug-main", () => {
+      run(true);
+    });
+  }, []);
 
   useEffect(() => {
     // 初始化 Monaco 环境
@@ -42,7 +77,6 @@ export const MoonBitCodeEditor: React.FC<MoonBitCodeEditorProps> = ({
         return "/editor.worker.js";
       },
     };
-
 
     // 创建编辑器模型
     modelRef.current = monaco.editor.createModel(
@@ -55,7 +89,6 @@ export const MoonBitCodeEditor: React.FC<MoonBitCodeEditorProps> = ({
     if (editorRef.current) {
       editorInstance.current = monaco.editor.create(editorRef.current, {
         model: modelRef.current,
-        lineNumbers: "off",
         glyphMargin: false,
         minimap: { enabled: false },
         automaticLayout: true,
@@ -66,7 +99,7 @@ export const MoonBitCodeEditor: React.FC<MoonBitCodeEditorProps> = ({
           alwaysConsumeMouseWheel: false,
         },
         fontFamily: "monospace",
-        theme: theme === 'dark' ? 'dark-plus' : 'light-plus',
+        theme: theme === 'dark' ? 'moonbit-dark' : 'moonbit-light',
       });
 
       // 监听内容变化
@@ -93,12 +126,8 @@ export const MoonBitCodeEditor: React.FC<MoonBitCodeEditorProps> = ({
     if (modelRef.current && modelRef.current.getValue() !== state.moonbitCode) {
       modelRef.current.setValue(state.moonbitCode);
     }
+    debounce(() => run(false), 100)
   }, [state.moonbitCode]);
-
-  // 主题更新
-  useEffect(() => {
-    monaco.editor.setTheme(theme === 'dark' ? 'dark-plus' : 'light-plus');
-  }, [theme]);
 
   async function run(debug: boolean) {
     if (debug) {
@@ -132,15 +161,12 @@ export const MoonBitCodeEditor: React.FC<MoonBitCodeEditorProps> = ({
     }
     const stdout = await trace(monaco.Uri.file("/main.mbt").toString());
     if (stdout === undefined) return;
+    console.log(stdout);
     dispatch({
       type: 'SET_MOONBIT_OUTPUT',
       payload: stdout
     });
   }
-
-  monaco.editor.registerCommand("moonbit-lsp/debug-main", () => {
-    run(true);
-  });
 
   return <div ref={editorRef} style={{ width: '100%', height: '100%' }} />;
 };

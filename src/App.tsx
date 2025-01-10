@@ -109,7 +109,7 @@ export function App() {
     }
     return (
       <Allotment>
-        <Allotment.Pane minSize={50} preferredSize="50%">
+        <Allotment.Pane minSize={50} preferredSize="20%">
           <components.ErrorBoundary>
             <components.TreeViewer
               api={compiler.api}
@@ -120,7 +120,7 @@ export function App() {
             />
           </components.ErrorBoundary>
         </Allotment.Pane>
-        <Allotment.Pane minSize={50} preferredSize="50%">
+        <Allotment.Pane minSize={50} preferredSize="20%">
           <components.ErrorBoundary>
             <components.PropertiesViewer
               compiler={compiler}
@@ -133,13 +133,32 @@ export function App() {
           </components.ErrorBoundary>
         </Allotment.Pane>
 
-        <Allotment.Pane minSize={50} preferredSize="50%">
-          <components.ErrorBoundary>
-            <components.MoonBitCodeEditor
-              id="editor"
-              code={state.moonbitCode ?? ""}
-            />
-          </components.ErrorBoundary>
+        <Allotment.Pane minSize={50} preferredSize="60%">
+          <Allotment vertical>
+            <Allotment.Pane minSize={50} preferredSize="70%">
+              <components.ErrorBoundary>
+                <components.MoonBitCodeEditor
+                  theme={state.options.theme}
+                />
+              </components.ErrorBoundary>
+            </Allotment.Pane>
+            <Allotment.Pane minSize={50} preferredSize="30%">
+              <components.ErrorBoundary>
+                <div 
+                  className="output-panel"
+                  style={{ 
+                    padding: '10px',
+                    overflow: 'auto',
+                    whiteSpace: 'pre-wrap',
+                    fontFamily: 'monospace',
+                    height: '100%'
+                  }}
+                >
+                  {state.moonbitOutput}
+                </div>
+              </components.ErrorBoundary>
+            </Allotment.Pane>
+          </Allotment>
         </Allotment.Pane>
       </Allotment>
     );
