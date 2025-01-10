@@ -20,19 +20,173 @@ const moon = moonbitMode.init({
 
 const trace = moonbitMode.traceCommandFactory();
 
-// 移除手动定义的语法规则，使用 TextMate 语法
-// monaco.languages.register({ id: 'moonbit' });
+// 注册 MoonBit 语言
+monaco.languages.register({ id: 'moonbit' });
+
+// 定义 MoonBit 语言的语法规则
+monaco.languages.setMonarchTokensProvider('moonbit', {
+  defaultToken: '',
+  tokenPostfix: '.moonbit',
+
+  // 控制关键字
+  keywords: [
+    'guard', 'if', 'while', 'break', 'continue', 'return', 
+    'try', 'catch', 'except', 'raise', 'match', 'else', 
+    'as', 'in', 'loop', 'for'
+  ],
+
+  // 声明关键字
+  declarations: [
+    'type', 'typealias', 'let', 'const', 'enum', 'struct',
+    'import', 'trait', 'derive', 'test', 'impl', 'with'
+  ],
+
+  // 修饰符
+  modifiers: ['mut', 'pub', 'priv', 'readonly', 'extern'],
+
+  // 支持的类型类
+  typeClasses: ['Eq', 'Compare', 'Hash', 'Show', 'Default', 'ToJson', 'FromJson'],
+
+  // 运算符
+  operators: [
+    '->', '=>', '=', '|>', '===', '==', '!=', '>=', '<=', 
+    '>', '<', '&&', '||', '|', '&', '^', '<<', '>>', '+', 
+    '-', '*', '%', '/'
+  ],
+
+  // 符号定义
+  symbols: /[=><!~?:&|+\-*\/\^%]+/,
+
+  // 转义字符
+  escapes: /\\(?:[0\\tnrb"']|x[0-9A-Fa-f]{2}|o[0-3][0-7]{2}|u[0-9A-Fa-f]{4}|u\{[0-9A-Fa-f]*\})/,
+
+  // 词法分析器规则
+  tokenizer: {
+    root: [
+      // 注释
+      [/\/\/\/.*$/, 'comment.doc'],
+      [/\/\/[^/].*$/, 'comment'],
+      [/\/\*/, 'comment', '@comment'],
+
+      // 字符串
+      [/'[^'\\]'/, 'string'],
+      [/"([^"\\]|\\.)*$/, 'string.invalid'],
+      [/"/, 'string', '@string'],
+      [/#\|.*/, 'string'],
+      [/\$\|.*/, 'string'],
+
+      // 数字
+      [/\b\d[\d_]*(?!\.)U?L?\b/, 'number'],
+      [/\b\d[\d_]*\.[\d_]+([Ee][+-]?\d[\d_]+)?\b/, 'number.float'],
+      [/\b0[XxOoBb][\dA-Fa-f_]+U?L?\b/, 'number.hex'],
+
+      // 类型名（大写字母开头）
+      [/\b[A-Z][A-Za-z0-9_]*\??/, 'type'],
+
+      // 函数定义和调用
+      [/\b(fn)\b\s*([A-Z][A-Za-z0-9_]*::)?([a-z0-9_][A-Za-z0-9_]*)?/, [
+        'keyword',
+        'type',
+        'function'
+      ]],
+      [/[a-z0-9_][A-Za-z0-9_]*[!?]?\s*\(/, 'function'],
+
+      // 模块名
+      [/@[A-Za-z][A-Za-z0-9_/]*/, 'namespace'],
+
+      // 关键字和标识符
+      [/\b(self)\b/, 'variable.language'],
+      [/\b(true|false|\(\))\b/, 'constant.language'],
+      [/\b[a-z_][a-zA-Z0-9_]*\b/, {
+        cases: {
+          '@keywords': 'keyword.control',
+          '@declarations': 'keyword',
+          '@modifiers': 'storage.modifier',
+          '@typeClasses': 'support.class',
+          '@default': 'variable'
+        }
+      }],
+
+      // 运算符和分隔符
+      [/@symbols/, {
+        cases: {
+          '@operators': 'operator',
+          '@default': ''
+        }
+      }],
+      [/[{}()\[\]]/, '@brackets'],
+    ],
+
+    comment: [
+      [/[^/*]+/, 'comment'],
+      [/\/\*/, 'comment', '@push'],
+      [/\*\//, 'comment', '@pop'],
+      [/[/*]/, 'comment']
+    ],
+
+    string: [
+      [/[^\\"]+/, 'string'],
+      [/@escapes/, 'string.escape'],
+      [/\\./, 'string.escape.invalid'],
+      [/\\\{/, { token: 'string.quote', next: '@interpolated' }],
+      [/"/, 'string', '@pop']
+    ],
+
+    interpolated: [
+      [/\}/, { token: 'string.quote', next: '@string' }],
+      { include: 'root' }
+    ]
+  }
+});
+
+// 配置语言特性
+monaco.languages.setLanguageConfiguration('moonbit', {
+  comments: {
+    lineComment: '//',
+    blockComment: ['/*', '*/']
+  },
+  brackets: [
+    ['{', '}'],
+    ['[', ']'],
+    ['(', ')']
+  ],
+  autoClosingPairs: [
+    { open: '{', close: '}' },
+    { open: '[', close: ']' },
+    { open: '(', close: ')' },
+    { open: '"', close: '"' },
+  ],
+  surroundingPairs: [
+    { open: '{', close: '}' },
+    { open: '[', close: ']' },
+    { open: '(', close: ')' },
+    { open: '"', close: '"' },
+  ]
+});
 
 // 设置编辑器主题
 monaco.editor.defineTheme('moonbit-light', {
   base: 'vs',
   inherit: true,
   rules: [
-    { token: 'keyword', foreground: '0000FF', fontStyle: 'bold' },
-    { token: 'type', foreground: '008080' },
-    { token: 'string', foreground: 'A31515' },
-    { token: 'number', foreground: '098658' },
+    { token: 'keyword', foreground: '0000FF' },
+    { token: 'keyword.control', foreground: '0000FF' },
+    { token: 'storage.modifier', foreground: '0000FF' },
+    { token: 'type', foreground: '267f99' },
+    { token: 'support.class', foreground: '267f99' },
+    { token: 'string', foreground: 'a31515' },
+    { token: 'string.escape', foreground: 'e3116c' },
     { token: 'comment', foreground: '008000' },
+    { token: 'comment.doc', foreground: '008000', fontStyle: 'italic' },
+    { token: 'number', foreground: '098658' },
+    { token: 'number.hex', foreground: '098658' },
+    { token: 'number.float', foreground: '098658' },
+    { token: 'constant.language', foreground: '0000ff' },
+    { token: 'function', foreground: '795E26' },
+    { token: 'variable', foreground: '001080' },
+    { token: 'variable.language', foreground: '0000ff' },
+    { token: 'operator', foreground: '000000' },
+    { token: 'namespace', foreground: '267f99' },
   ],
   colors: {}
 });
@@ -101,6 +255,7 @@ export const MoonBitCodeEditor: React.FC<MoonBitCodeEditorProps> = ({
         },
         fontFamily: "monospace",
         theme: theme === 'dark' ? 'moonbit-dark' : 'moonbit-light',
+        language: 'moonbit',
       });
 
       // 监听内容变化
