@@ -34,27 +34,67 @@ export function MoonBitTransformer(props: MoonBitProps): string {
   }
 
   function typealiasTransformer(node: Node) {
-    const children = getChildren(node);
-    if (children.length < 2) return "";
-    const hasExport = children.length > 1 ? children[0].kind == ts.SyntaxKind.ExportKeyword : false
-    let alias = children[children.length - 1].getText()
+    const _node = node as ts.TypeAliasDeclaration;
+    const hasExport = _node.modifiers?.some((m) => m.kind == ts.SyntaxKind.ExportKeyword) || false;
+    if (_node.name.getSourceFile() == undefined) {
+      return '';
+    }
+    let alias = _node.name.getText()
     // alias首字母大写
     alias = alias.charAt(0).toUpperCase() + alias.slice(1)
-    const type = children[children.length - 2].getText()
-    return `${hasExport ? 'pub ' : ''}typealias ${alias} = ${type}\n`;
+    return `${hasExport ? 'pub(all) ' : ''}typealias ${alias} = ${typeTransformer(_node.type)}\n`;
   }
 
   function interfaceTransformer(node: Node) {
     const _node = node as ts.InterfaceDeclaration;
     const hasExport = _node.modifiers?.some((m) => m.kind == ts.SyntaxKind.ExportKeyword) || false;
-    return `${hasExport ? 'pub ' : ''}struct ${_node.name.getText()} {
+    if (_node.name.getSourceFile() == undefined) {
+      return '';
+    }
+    return `${hasExport ? 'pub(all) ' : ''}struct ${_node.name.getText()} {
   ${_node.members
         .map((m) => m as ts.PropertySignature)
-        .map((m) => m.name.getText() + ': ' + m.type?.getText() ?? '')
+        .map((m) => m.name.getText() + ': ' + typeTransformer(m.type))
         .join('\n  ')
       }
 }
 `;
 
+  }
+
+  function typeTransformer(node: ts.TypeNode | undefined): string {
+    if (!node) return '';
+    switch (node.kind) {
+      case ts.SyntaxKind.BooleanKeyword:
+        return 'Bool'
+      case ts.SyntaxKind.NumberKeyword:
+        return 'Int'
+      case ts.SyntaxKind.StringKeyword:
+        return 'String'
+      case ts.SyntaxKind.UndefinedKeyword:
+      case ts.SyntaxKind.NullKeyword:
+        return 'Json'
+      case ts.SyntaxKind.JSDocNullableType:
+        return typeTransformer((node as ts.JSDocNullableType).type) + '?'
+      case ts.SyntaxKind.Unknown:
+        return 'Json'
+      case ts.SyntaxKind.UnionType: {
+        // 如果只有两个，并且其中一个是undefined
+        const _node = (node as ts.UnionTypeNode);
+        if (_node.types.length == 2 && _node.types[1].getText() == 'undefined') {
+          return typeTransformer(_node.types[0]) + '?'
+        }
+        return 'Json'
+      }
+      default: {
+        if (node.getSourceFile() == undefined) {
+          return '';
+        }
+        let typeName = node.getText();
+        // 首字母大写
+        typeName = typeName.charAt(0).toUpperCase() + typeName.slice(1)
+        return typeName;
+      }
+    }
   }
 }
