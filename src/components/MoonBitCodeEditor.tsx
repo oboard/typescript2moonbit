@@ -62,6 +62,7 @@ export const MoonBitCodeEditor: React.FC<MoonBitCodeEditorProps> = ({
   state.moonbitCode = MoonBitTransformer({
     sourceFile: compiler.sourceFile,
     mode: state.options.treeMode,
+    compiler: state.compiler,
   });
 
   useEffect(() => {
