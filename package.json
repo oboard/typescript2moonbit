@@ -1,0 +1,41 @@
+{
+  "name": "ts-ast-viewer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "author": "David Sherret",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "deno run --allow-read=. --allow-write=. scripts/patchPackage.ts"
+  },
+  "dependencies": {
+    "@moonbit/moonpad-monaco": "^0.1.202501070",
+    "monaco-editor-core": "^0.52.0",
+    "@viz-js/viz": "^3.3.1",
+    "allotment": "^1.20.0",
+    "circular-json": "^0.5.9",
+    "code-block-writer": "^13.0.3",
+    "lz-string": "^1.4.4",
+    "monaco-editor": "^0.52.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-monaco-editor": "0.56.2",
+    "react-spinners": "^0.13.6",
+    "react-treeview": "^0.4.7",
+    "ts-morph": "^25.0.0"
+  },
+  "devDependencies": {
+    "@types/circular-json": "^0.4.0",
+    "@types/inline-style-prefixer": "^5.0.0",
+    "@types/node": "^20.11.20",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.9",
+    "@types/react-treeview": "^0.4.3",
+    "@vitejs/plugin-react": "^4.2.1",
+    "glob": "^10.3.10",
+    "ts-factory-code-generator-generator": "^0.7.0",
+    "typescript": "5.7.2",
+    "vite": "^5.2.9",
+    "vite-plugin-monaco-editor": "^1.1.0"
+  }
+}

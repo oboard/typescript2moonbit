@@ -1,0 +1,8 @@
+node_modules
+npm-debug.log*
+*.js.map
+.vs
+.vscode
+.DS_Store
+dist
+*.local
