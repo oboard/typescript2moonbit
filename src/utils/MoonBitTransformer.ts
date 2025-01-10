@@ -76,22 +76,113 @@ export function MoonBitTransformer(props: MoonBitProps): string {
     if (_node.name.getSourceFile() == undefined) {
       return '';
     }
-    return `${hasExport ? 'pub(all) ' : ''}struct ${_node.name.getText()} {
-  ${_node.members
+
+    let allMembers = new Map<string, ts.TypeElement>();
+    let functions = '';
+
+    // 辅助函数：格式化参数列表
+    function formatParams(params: ts.NodeArray<ts.ParameterDeclaration>): {
+      moonbitParams: string;  // MoonBit 函数声明的参数列表
+      jsArgs: string;         // JavaScript 调用的参数列表
+      jsParams: string;       // JavaScript 函数的参数列表
+    } {
+      const paramList = params.map(p => ({
+        name: p.name.getText(),
+        type: typeTransformer(p.type),
+        optional: !!p.questionToken
+      }));
+
+      const moonbitParams = ['self: ' + _node.name.getText()]
+        .concat(paramList.map(p => `${p.name}: ${p.type}${p.optional ? '?' : ''}`))
+        .join(', ');
+
+      const jsParams = ['self']
+        .concat(paramList.map(p => p.name))
+        .join(params.length > 0 ? ', ' : '');
+
+      const jsArgs = paramList.map(p => p.name).join(', ');
+
+      return {
+        moonbitParams,
+        jsParams,
+        jsArgs
+      };
+    }
+
+    // 辅助函数：将驼峰命名转换为下划线格式
+    function camelToSnakeCase(name: string): string {
+      return name
+        .replace(/([A-Z])/g, '_$1')     // 在大写字母前添加下划线
+        .replace(/^_/, '')               // 移除开头的下划线
+        .toLowerCase();                  // 转换为小写
+    }
+
+    // 辅助函数：生成方法的 extern 函数定义
+    function generateMethodExtern(method: ts.MethodSignature, structName: string): string {
+      const params = formatParams(method.parameters);
+      const methodName = camelToSnakeCase(method.name.getText());
+      return `extern "js" fn ${structName}::${methodName}(${params.moonbitParams}) -> ${typeTransformer(method.type)} =
+#|(${params.jsParams}) => self.${method.name.getText()}(${params.jsArgs})
+`;
+    }
+
+    // 处理继承
+    if (_node.heritageClauses) {
+      for (const heritage of _node.heritageClauses) {
+        if (heritage.token === ts.SyntaxKind.ExtendsKeyword) {
+          for (const type of heritage.types) {
+            const symbol = compiler.bindingTools().typeChecker.getSymbolAtLocation(type.expression);
+            if (!symbol || !symbol.declarations) continue;
+
+            const baseDeclaration = symbol.declarations[0];
+            if (!ts.isInterfaceDeclaration(baseDeclaration)) continue;
+
+            // 收集基类的所有成员
+            baseDeclaration.members.forEach(member => {
+              if (ts.isPropertySignature(member)) {
+                allMembers.set(member.name.getText(), member);
+              } else if (ts.isMethodSignature(member)) {
+                // 收集方法并生成 extern 函数
+                allMembers.set(member.name.getText(), member);
+                functions += generateMethodExtern(member, _node.name.getText());
+              }
+            });
+          }
+        }
+      }
+    }
+
+    // 收集当前接口的成员
+    _node.members.forEach(member => {
+      if (ts.isPropertySignature(member)) {
+        allMembers.set(member.name.getText(), member);
+      } else if (ts.isMethodSignature(member)) {
+        allMembers.set(member.name.getText(), member);
+        functions += generateMethodExtern(member, _node.name.getText());
+      }
+    });
+
+    // 生成 struct
+    const structName = _node.name.getText();
+    const structDef = `${hasExport ? 'pub(all) ' : ''}struct ${structName} {
+  ${Array.from(allMembers.values())
         .map((m) => {
           if (ts.isPropertySignature(m)) {
-            return m.name.getText() + ': ' + typeTransformer(m.type)
-          }
-          if (ts.isMethodSignature(m)) {
-            return `${m.name.getText()}: (${m.parameters.map((p) => typeTransformer(p.type)).join(', ')}) -> ${typeTransformer(m.type)}`
+            return camelToSnakeCase(m.name.getText()) + ': ' + typeTransformer(m.type)
           }
           return '';
         })
+        .filter(Boolean)
         .join('\n  ')
       }
 }
-`;
 
+extern "js" fn ${structName}::new() -> ${structName} =
+#|() => new ${structName}()
+
+${functions}`;
+
+    return structDef;
   }
 
   function typeTransformer(node: ts.TypeNode | undefined): string {

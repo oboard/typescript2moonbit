@@ -164,46 +164,6 @@ monaco.languages.setLanguageConfiguration('moonbit', {
   ]
 });
 
-// 设置编辑器主题
-monaco.editor.defineTheme('moonbit-light', {
-  base: 'vs',
-  inherit: true,
-  rules: [
-    { token: 'keyword', foreground: '0000FF' },
-    { token: 'keyword.control', foreground: '0000FF' },
-    { token: 'storage.modifier', foreground: '0000FF' },
-    { token: 'type', foreground: '267f99' },
-    { token: 'support.class', foreground: '267f99' },
-    { token: 'string', foreground: 'a31515' },
-    { token: 'string.escape', foreground: 'e3116c' },
-    { token: 'comment', foreground: '008000' },
-    { token: 'comment.doc', foreground: '008000', fontStyle: 'italic' },
-    { token: 'number', foreground: '098658' },
-    { token: 'number.hex', foreground: '098658' },
-    { token: 'number.float', foreground: '098658' },
-    { token: 'constant.language', foreground: '0000ff' },
-    { token: 'function', foreground: '795E26' },
-    { token: 'variable', foreground: '001080' },
-    { token: 'variable.language', foreground: '0000ff' },
-    { token: 'operator', foreground: '000000' },
-    { token: 'namespace', foreground: '267f99' },
-  ],
-  colors: {}
-});
-
-monaco.editor.defineTheme('moonbit-dark', {
-  base: 'vs-dark',
-  inherit: true,
-  rules: [
-    { token: 'keyword', foreground: '569CD6', fontStyle: 'bold' },
-    { token: 'type', foreground: '4EC9B0' },
-    { token: 'string', foreground: 'CE9178' },
-    { token: 'number', foreground: 'B5CEA8' },
-    { token: 'comment', foreground: '6A9955' },
-  ],
-  colors: {}
-});
-
 export const MoonBitCodeEditor: React.FC<MoonBitCodeEditorProps> = ({
   theme = 'light'
 }) => {
@@ -254,7 +214,7 @@ export const MoonBitCodeEditor: React.FC<MoonBitCodeEditorProps> = ({
           alwaysConsumeMouseWheel: false,
         },
         fontFamily: "monospace",
-        theme: theme === 'dark' ? 'moonbit-dark' : 'moonbit-light',
+        theme: theme === 'dark' ? "vs-dark" : "vs",
         language: 'moonbit',
       });
 
