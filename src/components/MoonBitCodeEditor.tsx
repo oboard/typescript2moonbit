@@ -2,7 +2,7 @@ import { useEffect, useRef, useContext } from 'react';
 import * as monaco from 'monaco-editor-core';
 import * as moonbitMode from "@moonbit/moonpad-monaco";
 import { AppContext } from '../AppContext';
-import { MoonBitTransformer } from '../utils/MoonBitTransformer.ts';
+import { MoonBitTransformer } from '../utils/MoonBitTransformer';
 
 interface MoonBitCodeEditorProps {
   theme?: 'light' | 'dark';
